@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+<title>别踩白块</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="布尔教育 http://www.itbool.com" />
+<style>
+    #main{
+        width:400px;
+        height:400px;
+        background:white;
+        border:2px solid green;
+        margin:0 auto;
+        position: relative;
+        overflow: hidden;
+    }
+    #container{
+        width:100%;
+        height: 400px;
+        position: relative;
+        top: -100px;
+        background:white;
+    }
+    .row{
+        width: 100%;
+        height: 100px;
+    }
+    .cell{
+        width: 100px;
+        height: 100px;
+        float: left;
+    }
+    .black{
+        background: black;
+    }
+    .red{
+        background: red;
+    }
+    #pause{
+        height: 20;
+        width: 20;
+        float:right;
+        background: gray;
+    }
+    #score{
+        text-align: center;
+    }
+</style>
+</head>
+    <body>
+        <h1 id="score">0</h1>
+        <div id="pause">暂停</div>
+        <div id="main">
+            <div id="container"></div>
+        </div>
+        <embed src="Kalimba.mp3" hidden ="true" />
+    </body>
+    <script>
+        var clock = null;
+        var state = 0;//0初始化 1进行中 2暂停 3失败
+        var speed = 2;
+        function init(){
+            for(var i=0; i<4;i++){
+                createrow();
+            }
+            $('main').onclick = function(ev){
+               judge(ev);
+            }
+            $('pause').onclick = function(ev){
+                fpause(ev);
+            }
+        }
+
+        function fpause(ev){
+            alert('暂停中，点击确定继续游戏');
+        }
+        function judge(ev){
+                if(state ==3){
+                    alert('失败者禁入,重玩请刷新');
+                    return;
+                }
+                if(ev.target.className.indexOf('black') == -1){
+                        ev.target.className='cell red';
+                        fail();
+                } else {
+                        ev.target.className = 'cell';
+                        ev.target.parentNode.pass = 1;
+                        score();
+                }
+        }
+
+        function score(){
+                var newscore = parseInt($('score').innerHTML)+1;
+                $('score').innerHTML = newscore;
+                if(newscore%10 == 0) accelarate();
+        }
+
+        function move(){
+            var con=$('container');
+            var top = parseInt(window.getComputedStyle(con,null)['top']);
+            if(speed+top > 0){top = 0;}
+            else top += speed;
+            con.style.top = top +'px';
+            if(top == 0) {
+                createrow();
+                con.style.top = '-100px';
+                if(con.children.length == 6)
+                drow();
+            } else if(top ==  speed-100){
+                if(con.children.length == 5 &&con.children[con.children.length-1].pass !== 1){
+                    fail();
+                }
+            }
+        }
+
+        function accelarate(){
+                speed+=1;
+                if(speed == 20){alert('你牛！不跟你玩了');}
+        }
+
+        function fail(){
+            clearInterval(clock);
+            alert('game over');
+            state = 3;
+        }
+
+        function drow(){
+           var con = $('container');
+           con.removeChild(con.lastChild);
+        }
+
+        function start(){
+            clock = window.setInterval('move()',30);
+        }
+
+        function createrow(){
+                    var con = $('container');
+            var row = createcell('row');
+                    var classes = createBlack();
+            for(var i=0; i<4; i++){
+                row.appendChild(createcell(classes[i]));
+            }
+                    if(con.firstChild == null)
+            {con.appendChild(row);}
+                    else{
+                        con.insertBefore(row,con.firstChild);
+                    }
+        }
+
+        function createcell(className){
+            var div = document.createElement('div');
+            div.className = className;
+            return div;
+        }
+
+        function createBlack(){
+            var arr = ['cell','cell','cell','cell'];
+            var i = Math.floor(Math.random()*4);
+            arr[i]='cell black';
+            return arr;
+        }
+
+        function $(id){
+            return document.getElementById(id);
+        }
+
+
+
+        init();
+        alert('开始请点确定');
+        start();
+    </script>
+</html>
